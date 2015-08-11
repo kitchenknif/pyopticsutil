@@ -1,4 +1,3 @@
-from nose.plugins.deprecated import Deprecated
 import tables
 import os
 import utilities.misc
@@ -7,10 +6,6 @@ import scipy.stats
 import enum
 import copy
 import spc
-
-#
-#TODO: proper load spec from SPC
-#
 
 class operation(enum.Enum):
     add = 1
@@ -42,21 +37,24 @@ class Spec:
         self.data = []
 
     def rebin(self, start, end, step=-1):
-
-        #hopefully we have a constant step...
+        # hopefully we have a constant step...
         if step == -1:
             step = numpy.average(numpy.diff(self.wavelengths))
         self.wavelengths, self.data = utilities.misc.rebin(self.wavelengths, self.data, start, end, step)
 
+    def reverse(self):
+        self.wavelengths = self.wavelengths[::-1]
+        self.data = self.data[::-1]
+
     @staticmethod
-    def loadSpecFromASCII(filename):
+    def loadSpecFromASCII(filename, delim=' '):
         f = open(filename, 'r')
         lines = f.readlines()
         f.close()
         xvalues = []
         yvalues = []
         for line in lines:
-            split = line.split()
+            split = line.split(delim)
             xvalues.append(float(split[0]))
             yvalues.append(float(split[1]))
         spc = Spec()
