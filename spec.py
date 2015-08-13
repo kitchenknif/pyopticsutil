@@ -46,6 +46,12 @@ class Spec:
         self.wavelengths = self.wavelengths[::-1]
         self.data = self.data[::-1]
 
+    def save_as_ascii(self, filename):
+        with open(filename, 'w') as f:
+            f.write("#X (nm), Y\n")
+            for x, y in zip(self.wavelengths, self.data):
+                f.write("{}, {}\n".format(x, y))
+
     @staticmethod
     def loadSpecFromASCII(filename, delim=' '):
         f = open(filename, 'r')
@@ -54,9 +60,10 @@ class Spec:
         xvalues = []
         yvalues = []
         for line in lines:
-            split = line.split(delim)
-            xvalues.append(float(split[0]))
-            yvalues.append(float(split[1]))
+            if not line.startswith('#'):
+                split = line.split(delim)
+                xvalues.append(float(split[0]))
+                yvalues.append(float(split[1]))
         spc = Spec()
         spc.wavelengths = xvalues
         spc.data = yvalues

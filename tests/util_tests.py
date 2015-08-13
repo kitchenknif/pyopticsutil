@@ -1,4 +1,4 @@
-import util
+import utilities.io as util
 import numpy
 import matplotlib.pyplot as plt
 x = numpy.linspace(0, 10, 10)
