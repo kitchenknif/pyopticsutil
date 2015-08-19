@@ -193,6 +193,13 @@ def specOperation(inputSpecs, secondOperand, op):
 
     return sp
 
+def getSpecBasline(sp, poly=1):
+    s = Spec()
+    coeffs = numpy.polyfit(sp.wavelengths, sp.data, poly)
+    p = numpy.poly1d(coeffs)
+    s.wavelengths = copy.copy(sp.wavelengths)
+    s.data = numpy.asarray([p(lambd) for lambd in s.wavelengths])
+    return s
 
 def getSpecInstrumentationAbsError(spec, minDark=220, maxDark=300):
     '''Absolute error from instrumentation noise'''
