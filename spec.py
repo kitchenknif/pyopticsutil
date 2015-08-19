@@ -33,8 +33,8 @@ class Spec:
             Spec.id -= 1
             self.id = Spec.id
 
-        self.wavelengths = []
-        self.data = []
+        self.wavelengths = numpy.empty(1, dtype=numpy.float64)
+        self.data = numpy.empty(1, dtype=numpy.float64)
 
     def rebin(self, start, end, step=-1):
         # hopefully we have a constant step...
@@ -65,8 +65,8 @@ class Spec:
                 xvalues.append(float(split[0]))
                 yvalues.append(float(split[1]))
         spc = Spec()
-        spc.wavelengths = xvalues
-        spc.data = yvalues
+        spc.wavelengths = numpy.asarray(xvalues)
+        spc.data = numpy.asarray(yvalues)
         return spc
 
     @staticmethod
@@ -74,8 +74,8 @@ class Spec:
         f = tables.open_file(filename)
         print(f.root.spec.id[0])
         spc = Spec(f.root.spec.id[0])
-        spc.wavelengths = f.root.spec.q[:]
-        spc.data = f.root.spec.data[:]
+        spc.wavelengths = numpy.asarray(f.root.spec.q[:])
+        spc.data = numpy.asarray(f.root.spec.data[:])
         f.close()
         return spc
 
@@ -111,14 +111,18 @@ class Spec:
         else:
             s = Spec()
 
+        xvals = []
+        yvals = []
         for l in lines[1:]:
             l = l.rstrip('\t\r\n')
             l = l.lstrip('\t\r\n')
             if l:
                 x, y = l.split("\t")
-                s.wavelengths.append(float(x))
-                s.data.append(float(y))
+                xvals.append(float(x))
+                yvals.append(float(y))
 
+        s.wavelengths = numpy.asarray(xvals)
+        s.data = numpy.asarray(yvals)
         return s
 
     @staticmethod
@@ -151,42 +155,43 @@ def specOperation(inputSpecs, secondOperand, op):
             specs.append(specOperation(s, secondOperand, op))
         return specs
 
-    specs = copy.deepcopy(inputSpecs)
+    sp = copy.deepcopy(inputSpecs)
 
     if isinstance(secondOperand, Spec):
         overlap = False
-        overlapMin = numpy.maximum(numpy.amin(specs.wavelengths), numpy.amin(secondOperand.wavelengths))
-        overlapMax = numpy.minimum(numpy.amax(specs.wavelengths), numpy.amax(secondOperand.wavelengths))
+        overlapMin = numpy.maximum(numpy.amin(sp.wavelengths), numpy.amin(secondOperand.wavelengths))
+        overlapMax = numpy.minimum(numpy.amax(sp.wavelengths), numpy.amax(secondOperand.wavelengths))
         if overlapMax > overlapMin:
             overlap = True
         if not overlap:
             raise Exception("Specs do not overlap.")
 
-        step = numpy.average(numpy.diff(specs.wavelengths))
+        step = numpy.average(numpy.diff(sp.wavelengths))
 
-        specs.rebin(overlapMin, overlapMax, step)
-        secondOperand.rebin(overlapMin, overlapMax, step)
+        sp.rebin(overlapMin, overlapMax, step)
+        secondOp = copy.deepcopy(secondOperand)
+        secondOp.rebin(overlapMin, overlapMax, step)
 
         if op == operation.add:
-            specs.data = numpy.add(specs.data, secondOperand.data)
+            sp.data = numpy.add(sp.data, secondOp.data)
         elif op == operation.subtr:
-            specs.data = numpy.subtract(specs.data, secondOperand.data)
+            sp.data = numpy.subtract(sp.data, secondOp.data)
         elif op == operation.mult:
-            specs.data = numpy.multiply(specs.data, secondOperand.data)
+            sp.data = numpy.multiply(sp.data, secondOp.data)
         elif op == operation.div:
-            specs.data = numpy.divide(specs.data, secondOperand.data)
+            sp.data = numpy.divide(sp.data, secondOp.data)
 
     else:
         if op == operation.add:
-            specs.data = numpy.add(specs.data, secondOperand)
+            sp.data = numpy.add(sp.data, secondOperand)
         elif op == operation.subtr:
-            specs.data = numpy.subtract(specs.data, secondOperand)
+            sp.data = numpy.subtract(sp.data, secondOperand)
         elif op == operation.mult:
-            specs.data = numpy.multiply(specs.data, secondOperand)
+            sp.data = numpy.multiply(sp.data, secondOperand)
         elif op == operation.div:
-            specs.data = numpy.divide(specs.data, secondOperand)
+            sp.data = numpy.divide(sp.data, secondOperand)
 
-    return specs
+    return sp
 
 
 def getSpecInstrumentationAbsError(spec, minDark=220, maxDark=300):
