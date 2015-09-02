@@ -11,7 +11,7 @@ __author__ = 'Kryosugarra'
 #
 # Peak find
 #
-def get1DPeak(x, y, inverse=False, interpolate=True, indicies=False, use='mass'):
+def get1DPeak(x, y, *, inverse=False, interpolate=True, indicies=False, use='mass'):
     assert len(x) == len(y)
     if inverse:
         maxY = numpy.max(y)
@@ -35,7 +35,7 @@ def get1DPeak(x, y, inverse=False, interpolate=True, indicies=False, use='mass')
 
     if indicies:
         diffs = [i - peakPos for i in x]
-        peakIndex = diffs.index(numpy.min(diffs))
+        peakIndex = diffs.index(numpy.min(numpy.abs(diffs)))
         peakPos = peakIndex
         peakVal = y[peakIndex]
     elif interpolate:
@@ -43,7 +43,7 @@ def get1DPeak(x, y, inverse=False, interpolate=True, indicies=False, use='mass')
         peakVal = f(peakPos)
     else:
         diffs = [i - peakPos for i in x]
-        peakIndex = diffs.index(numpy.min(diffs))
+        peakIndex = diffs.index(numpy.min(numpy.abs(diffs)))
         peakPos = x[peakIndex]
         peakVal = y[peakIndex]
 
