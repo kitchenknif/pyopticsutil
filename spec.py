@@ -193,7 +193,7 @@ def specOperation(inputSpecs, secondOperand, op):
 
     return sp
 
-def getSpecBasline(sp, poly=1):
+def getSpecBaseline(sp, poly=1):
     s = Spec()
     coeffs = numpy.polyfit(sp.wavelengths, sp.data, poly)
     p = numpy.poly1d(coeffs)
