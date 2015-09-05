@@ -33,7 +33,8 @@ class Spec:
             Spec.id -= 1
             self.id = Spec.id
 
-        self.wavelengths = numpy.empty(1, dtype=numpy.float64)
+        self.x = numpy.empty(1, dtype=numpy.float64)
+        self.wavelengths = self.x  # Time to deprecate wavelengths, since use is wider.
         self.data = numpy.empty(1, dtype=numpy.float64)
 
     def rebin(self, start, end, step=-1):
@@ -51,6 +52,13 @@ class Spec:
             f.write("#X (nm), Y\n")
             for x, y in zip(self.wavelengths, self.data):
                 f.write("{}, {}\n".format(x, y))
+
+    @staticmethod
+    def specFromXYData(x, y):
+        spc = Spec()
+        spc.wavelengths = numpy.asarray(x)
+        spc.data = numpy.asarray(y)
+        return spc
 
     @staticmethod
     def loadSpecFromASCII(filename, delim=' '):
