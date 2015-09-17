@@ -61,13 +61,13 @@ class Spec:
         return spc
 
     @staticmethod
-    def loadSpecFromASCII(filename, delim=' '):
+    def loadSpecFromASCII(filename, *, delim=' ', headerlines=0):
         f = open(filename, 'r')
         lines = f.readlines()
         f.close()
         xvalues = []
         yvalues = []
-        for line in lines:
+        for line in lines[headerlines:]:
             if not line.startswith('#'):
                 split = line.split(delim)
                 xvalues.append(float(split[0]))
@@ -76,6 +76,16 @@ class Spec:
         spc.wavelengths = numpy.asarray(xvalues)
         spc.data = numpy.asarray(yvalues)
         return spc
+
+    @staticmethod
+    def loadAllSpecFromASCII(path, *, extension='.txt', delim=' ', headerlines=0):
+        spc = []
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if file.endswith(extension):
+                    spc.append(Spec.loadSpecFromASCII(os.path.join(root, file)))
+        return spc
+
 
     @staticmethod
     def loadSpecFromHDF5(filename):
