@@ -149,7 +149,7 @@ class Spec:
         for root, dirs, files in os.walk(path):
             for file in files:
                 if file.endswith(".spc"):
-                    spc.append(Spec.loadSpecFromSPC(path + file))
+                    spc.append(Spec.loadSpecFromSPC(os.path.join(root, file)))
         return spc
 
 def getSpecByID(specs, id):
