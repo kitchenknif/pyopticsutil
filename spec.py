@@ -5,7 +5,7 @@ import numpy
 import scipy.stats
 import enum
 import copy
-import spc
+import spc.spc as spc
 
 class operation(enum.Enum):
     add = 1
@@ -61,7 +61,7 @@ class Spec:
         return spc
 
     @staticmethod
-    def loadSpecFromASCII(filename, *, delim=' ', headerlines=0):
+    def loadSpecFromASCII(filename, *, decimal='.', delim=' ', headerlines=0):
         f = open(filename, 'r')
         lines = f.readlines()
         f.close()
@@ -69,21 +69,24 @@ class Spec:
         yvalues = []
         for line in lines[headerlines:]:
             if not line.startswith('#'):
+                line = line.replace(decimal, '.')
                 split = line.split(delim)
                 xvalues.append(float(split[0]))
                 yvalues.append(float(split[1]))
         spc = Spec()
         spc.wavelengths = numpy.asarray(xvalues)
         spc.data = numpy.asarray(yvalues)
+        spc.filename = os.path.basename(filename)
         return spc
 
     @staticmethod
-    def loadAllSpecFromASCII(path, *, extension='.txt', delim=' ', headerlines=0):
+    def loadAllSpecFromASCII(path, *, extension='.txt', decimal='.', delim=' ', headerlines=0):
         spc = []
         for root, dirs, files in os.walk(path):
             for file in files:
                 if file.endswith(extension):
-                    spc.append(Spec.loadSpecFromASCII(os.path.join(root, file)))
+                    spc.append(Spec.loadSpecFromASCII(os.path.join(root, file),
+                                                      decimal=decimal, delim=delim, headerlines=headerlines))
         return spc
 
 
@@ -94,6 +97,7 @@ class Spec:
         spc = Spec(f.root.spec.id[0])
         spc.wavelengths = numpy.asarray(f.root.spec.q[:])
         spc.data = numpy.asarray(f.root.spec.data[:])
+        spc.filename = os.path.basename(filename)
         f.close()
         return spc
 
@@ -141,6 +145,7 @@ class Spec:
 
         s.wavelengths = numpy.asarray(xvals)
         s.data = numpy.asarray(yvals)
+        s.filename = os.path.basename(filename)
         return s
 
     @staticmethod

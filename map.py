@@ -5,29 +5,36 @@ import re
 #TODO: class
 
 def load_Nanonics_NSOM_map(filename):
-    channels = dict()
+    map = dict()
     with open(filename, 'rb') as f:
         data = f.read()
         type, header, data = re.split(b'-Start Header-|-End Header-', data)
         assert b"NAN File" in type
 
         # Parse Header
-        header, comment = header.split(b',comment')  # "Comment" format is hard to parse, not touching it for now
+        header, comment = header.split(b',comment=')  # "Comment" format is hard to parse, not touching it for now
         header = re.sub(b"[ \n\t\s\r]", b"", header)
         header = header.split(b',')
         header = [item.split(b'=') for item in header]
         header_dict = dict()
-        header_dict[b'comment'] = comment
+
+        #Parse Comment
+        comment = re.sub(b"\r\n", b"\n", comment)
+        comment = re.sub(b"\xb5", b"mk", comment)
+        comment_l = comment.decode('ascii').split('\n')
+
+        header_dict['comment'] = comment_l
         for key, val in header:
             if b'.' in val:
                 val = float(val)
             else:
                 val = int(val)
-            header_dict[key] = val
+            header_dict[key.decode('ascii')] = val
 
         #
         #Parse Channels
         #
+        channels = dict()
         data = re.split(b'-Start Channel Header-', data)[1:]
         for dat in data:
             c_header, c_data = dat.split(b'-End Channel Header-')
@@ -42,7 +49,11 @@ def load_Nanonics_NSOM_map(filename):
             for key, val in c_header:
                 if key == b"CMN" or key == b"CMX":
                     val = float(val)
-                channel_header[key] = val
+                elif key == b"CHI":
+                    val = int(val)
+                else:
+                    val = val.decode('ascii')
+                channel_header[key.decode('ascii')] = val
 
             channel_array = []
 
@@ -55,10 +66,10 @@ def load_Nanonics_NSOM_map(filename):
                 channel_array.append(byte)  # = struct.unpack_from("H", c_data)
             channel_size = len(channel_array)
 
-            cmx = channel_header[b'CMX']
-            cmn = channel_header[b'CMN']
-            ref = header_dict[b'ReF']
-            res = header_dict[b'ReS']
+            cmx = channel_header['CMX']
+            cmn = channel_header['CMN']
+            ref = header_dict['ReF']
+            res = header_dict['ReS']
             a = (cmn-cmx)/(numpy.max(channel_array)-numpy.min(channel_array))
             b = cmx-a*numpy.max(channel_array)
             channel_array = numpy.multiply(channel_array, a) + b
@@ -75,6 +86,10 @@ def load_Nanonics_NSOM_map(filename):
             channel = dict()
             channel['trace'] = trace
             channel['retrace'] = retrace
-            channels[channel_header[b'CHN'].decode('ascii')] = channel
+            channel['header'] = channel_header
+            channels[channel_header['CHN']] = channel
 
-    return channels
+
+        map['header'] = header_dict
+        map['channels'] = channels
+    return map
