@@ -1,6 +1,7 @@
-import utilities.io as util
 import numpy
-import matplotlib.pyplot as plt
+
+import deprecated.io as util
+
 x = numpy.linspace(0, 10, 10)
 y = numpy.cos(x)
 

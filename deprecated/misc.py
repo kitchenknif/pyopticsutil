@@ -3,7 +3,6 @@ import itertools
 import scipy.interpolate
 import scipy.signal
 
-__author__ = 'Kryosugarra'
 
 def rebin(xValues, yValues, start, end, step):
     assert start >= xValues[0]

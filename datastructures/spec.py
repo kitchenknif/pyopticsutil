@@ -1,11 +1,14 @@
-import tables
+import copy
+import enum
 import os
-import utilities.misc
+
 import numpy
 import scipy.stats
-import enum
-import copy
 import spc.spc as spc
+import tables
+
+import deprecated.misc
+
 
 class operation(enum.Enum):
     add = 1
@@ -41,7 +44,7 @@ class Spec:
         # hopefully we have a constant step...
         if step == -1:
             step = numpy.average(numpy.diff(self.wavelengths))
-        self.wavelengths, self.data = utilities.misc.rebin(self.wavelengths, self.data, start, end, step)
+        self.wavelengths, self.data = deprecated.misc.rebin(self.wavelengths, self.data, start, end, step)
 
     def reverse(self):
         self.wavelengths = self.wavelengths[::-1]

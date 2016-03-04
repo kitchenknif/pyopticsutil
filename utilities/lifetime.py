@@ -2,7 +2,7 @@ import os
 import numpy
 import scipy.optimize
 
-from .utilities.geometry import get1DPeak
+from utilities.geometry_1d import get1DPeak
 
 
 def load_LT_from_path(path):

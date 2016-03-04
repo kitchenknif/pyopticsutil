@@ -1,5 +1,7 @@
 from unittest import TestCase
-import spec
+
+from datastructures import spec
+
 __author__ = 'Kryosugarra'
 
 
