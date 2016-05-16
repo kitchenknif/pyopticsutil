@@ -7,4 +7,4 @@ and a jumble of one-shot functions, 1D/2D peak finding, 1D/2D file io, etc...
 - numpy
 - scipy
 - PyTables (HDF5 support)
-- spc (https://github.com/kitchenknif/spc, spc format support)
+- spc (https://github.com/rohanisaac/spc, spc format support)
